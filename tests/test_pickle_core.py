@@ -27,7 +27,7 @@ except ImportError:  # python 2
 import hashlib
 import pandas as pd
 
-from cachier import cachier
+from cachier import cachier, Info
 from cachier.pickle_core import DEF_CACHIER_DIR
 
 
@@ -152,6 +152,40 @@ def test_ignore_cache():
     int3 = _random_num_with_arg('a', ignore_cache=True)
     assert int3 != int1
     int4 = _random_num_with_arg('a')
+    assert int4 != int3
+    assert int4 == int1
+    _random_num_with_arg.clear_cache()
+
+
+def test_cachier_info():
+    """Tests that the cachier_info feature works correctly."""
+    _random_num.clear_cache()
+    call_info = Info()
+    int1 = _random_num(cachier_info=call_info)
+    assert not call_info.is_from_cache
+    int2 = _random_num(cachier_info=call_info)
+    assert call_info.is_from_cache
+    assert int2 == int1
+    int3 = _random_num(ignore_cache=True, cachier_info=call_info)
+    assert not call_info.is_from_cache
+    assert int3 != int1
+    int4 = _random_num(cachier_info=call_info)
+    assert call_info.is_from_cache
+    assert int4 != int3
+    assert int4 == int1
+    _random_num.clear_cache()
+
+    _random_num_with_arg.clear_cache()
+    int1 = _random_num_with_arg('a', cachier_info=call_info)
+    assert not call_info.is_from_cache
+    int2 = _random_num_with_arg('a', cachier_info=call_info)
+    assert call_info.is_from_cache
+    assert int2 == int1
+    int3 = _random_num_with_arg('a', ignore_cache=True, cachier_info=call_info)
+    assert not call_info.is_from_cache
+    assert int3 != int1
+    int4 = _random_num_with_arg('a', cachier_info=call_info)
+    assert call_info.is_from_cache
     assert int4 != int3
     assert int4 == int1
     _random_num_with_arg.clear_cache()
